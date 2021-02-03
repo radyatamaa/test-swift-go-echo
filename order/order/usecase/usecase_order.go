@@ -193,14 +193,14 @@ func (m orderUsecase) Create(c context.Context, ar *models.NewCommandOrder, user
 
 
 
-		getStock ,err := m.stockRepo.List(ctx,1,0,element.ProductId)
+		getStock ,err := m.stockRepo.GetFirst(ctx,element.ProductId)
 		if err != nil {
 			return nil, err
 		}
 
 		var currentStock int
-		if len(getStock) > 0 {
-			currentStock = getStock[0].CurrentStock - element.Qty
+		if getStock != nil {
+			currentStock = getStock.CurrentStock - element.Qty
 		}
 
 		stock := models.Stock{
