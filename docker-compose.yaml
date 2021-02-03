@@ -1,0 +1,8 @@
+version: "2.3"
+services:
+  web:
+    image: radyatamaa/cgo-indonesia-api:1.0.0
+    container_name: cgo_api
+    ports:
+      - 9090:9090
+
