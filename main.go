@@ -47,17 +47,12 @@ import (
 
 func main() {
 
-	//dbHost := "localhost"
-	//dbPort := "3306"
-	//dbUser := "root"
-	//dbPass := ""
-	//dbName := "swift_logistic"
-
-	dbHost := "bkni-ri.mysql.database.azure.com"
+	dbHost := "localhost"
 	dbPort := "3306"
-	dbUser := "adminbkni@bkni-ri"
-	dbPass := "Standar123."
-	dbName := "test_db"
+	dbUser := "root"
+	dbPass := ""
+	dbName := "swift_logistic"
+
 
 	connection := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbName)
 	val := url.Values{}
