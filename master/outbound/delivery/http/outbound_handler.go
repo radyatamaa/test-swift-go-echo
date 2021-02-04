@@ -29,6 +29,8 @@ type outboundHandler struct {
 func NewoutboundHandler(e *echo.Echo, us outbound.Usecase, authUsecase auth.Usecase) {
 	handler := &outboundHandler{
 		outboundUsecase: us,
+
+		authUsecase:authUsecase,
 	}
 	//e.POST("/master/outbound", handler.Create)
 	//e.PUT("/master/outbound/:id", handler.UpdateOutboundy)

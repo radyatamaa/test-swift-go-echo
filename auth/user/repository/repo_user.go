@@ -85,10 +85,10 @@ func (m *userRepository) Create(ctx context.Context, a models.User) (*string, er
 	//a.Id = lastID
 	return &a.Id, nil
 }
-func (m *userRepository) ValidateUser(ctx context.Context, email, password string) (res *models.User,err error) {
-	query := `SELECT * FROM users WHERE is_active = 1 AND is_deleted = 0 AND user_email = ? AND password = ?`
+func (m *userRepository) ValidateUser(ctx context.Context, email string) (res *models.User,err error) {
+	query := `SELECT * FROM users WHERE is_active = 1 AND is_deleted = 0 AND user_email = ?`
 
-	list, err := m.fetch(ctx, query, email,password)
+	list, err := m.fetch(ctx, query, email)
 	if err != nil {
 		return nil, err
 	}

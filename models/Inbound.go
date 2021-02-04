@@ -45,7 +45,6 @@ type InboundJoinProduct struct {
 
 type NewCommandInbound struct {
 	Id                   string     `json:"id" validate:"required"`
-	InboundTime 		time.Time `json:"inbound_time"`
 	ExpiredDate 		string `json:"expired_date"`
 	ProductId 			string `json:"product_id"`
 	Jumlah 				int `json:"jumlah"`

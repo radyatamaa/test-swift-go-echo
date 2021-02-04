@@ -73,11 +73,17 @@ func (m orderUsecase) UpdateStatus(c context.Context, order *models.NewCommandOr
 	}
 
 	err = m.orderRepo.Insert(ctx, getOrder)
-
-
 	if err != nil {
 		return err
 	}
+	if getOrder.Status == 7 || getOrder.Status == 8{
+		err = m.stockRepo.DeleteInOutBound(ctx, "",getOrder.ReferenceNumber,getOrder.CreatedBy)
+		if err != nil {
+			return err
+		}
+	}
+
+
 	return nil
 }
 

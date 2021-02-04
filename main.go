@@ -47,12 +47,17 @@ import (
 
 func main() {
 
-	dbHost := viper.GetString(`database.host`)
-	dbPort := viper.GetString(`database.port`)
-	dbUser := viper.GetString(`database.user`)
-	dbPass := viper.GetString(`database.pass`)
-	dbName := viper.GetString(`database.name`)
+	//dbHost := "localhost"
+	//dbPort := "3306"
+	//dbUser := "root"
+	//dbPass := ""
+	//dbName := "swift_logistic"
 
+	dbHost := "bkni-ri.mysql.database.azure.com"
+	dbPort := "3306"
+	dbUser := "adminbkni@bkni-ri"
+	dbPass := "Standar123."
+	dbName := "test_db"
 
 	connection := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbName)
 	val := url.Values{}
@@ -95,7 +100,7 @@ func main() {
 
 	authUsecase := _authUsecase.NewauthUsecase()
 	userUsecase := _userUsecase.NewuserUsecase(timeoutContext,userRepo)
-	inboundUsecase := _inboundUsecase.NewinboundUsecase(userUsecase,inboundRepo,timeoutContext)
+	inboundUsecase := _inboundUsecase.NewinboundUsecase(stockRepo,userUsecase,inboundRepo,timeoutContext)
 	outboundUsecase := _outboundUsecase.NewoutboundUsecase(userUsecase,outboundRepo,timeoutContext)
 	productUsecase := _productUsecase.NewproductUsecase(userUsecase,productRepo,timeoutContext)
 	stockUsecase := _stockUsecase.NewstockUsecase(userUsecase,stockRepo,timeoutContext)

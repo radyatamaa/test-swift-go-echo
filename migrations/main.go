@@ -12,7 +12,12 @@ import (
 
 func main() {
 	//local
-	db, err := gorm.Open("mysql", "root:@(localhost:3306)/swift_logistic?charset=utf8&parseTime=True&loc=Local")
+	//db, err := gorm.Open("mysql", "root:@(localhost:3306)/swift_logistic?charset=utf8&parseTime=True&loc=Local")
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+
+	db, err := gorm.Open("mysql", "adminbkni@bkni-ri:Standar123.@(bkni-ri.mysql.database.azure.com)/test_db?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
 		fmt.Println(err)
 	}

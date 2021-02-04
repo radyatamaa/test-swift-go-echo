@@ -143,13 +143,13 @@ func (m *inboundRepository) Delete(ctx context.Context, id string, deleted_by st
 
 func (m *inboundRepository) Insert(ctx context.Context, a *models.Inbound) error {
 	query := `INSERT inbounds SET id=? , created_by=? , created_date=? , modified_by=?, modified_date=? , deleted_by=? , deleted_date=? , is_deleted=? , is_active=? ,
-	inbound_time=?,product_id=?,jumlah=?,harga_beli,total=?,no_po=?`
+	inbound_time=?,expired_date=?,product_id=?,jumlah=?,harga_beli=?,total=?,no_po=?`
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return err
 	}
 	_, err = stmt.ExecContext(ctx, a.Id, a.CreatedBy, time.Now(), nil, nil, nil, nil, 0, 1,
-		a.InboundTime,a.ProductId,a.Jumlah,a.HargaBeli,a.Total,a.NoPO)
+		a.InboundTime,a.ExpiredDate,a.ProductId,a.Jumlah,a.HargaBeli,a.Total,a.NoPO)
 	if err != nil {
 		return err
 	}
@@ -199,7 +199,7 @@ func (m *inboundRepository) List(ctx context.Context, limit, offset int) ([]*mod
 				inbounds i
 				JOIN products p ON p.id = i.product_id
 				WHERE i.is_active = 1 AND i.is_deleted = 0 AND p.is_active = 1 AND p.is_deleted = 0`
-	query = query + ` order_by created_date desc`
+	query = query + ` order by created_date desc`
 	query = query + ` LIMIT ? OFFSET ?`
 	list, err := m.fetch(ctx, query, limit, offset)
 	if err != nil {

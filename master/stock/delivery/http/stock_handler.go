@@ -28,6 +28,8 @@ type stockHandler struct {
 func NewstockHandler(e *echo.Echo, us stock.Usecase, authUsecase auth.Usecase) {
 	handler := &stockHandler{
 		stockUsecase: us,
+
+		authUsecase:authUsecase,
 	}
 	e.GET("/master/stock", handler.List)
 }

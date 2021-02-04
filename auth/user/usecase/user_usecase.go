@@ -7,10 +7,10 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"github.com/auth/user"
 	guuid "github.com/google/uuid"
 	"github.com/models"
+	"golang.org/x/crypto/bcrypt"
 	"io"
 	"time"
 )
@@ -30,28 +30,43 @@ func NewuserUsecase(timeout time.Duration,	userRepo user.Repository) user.Usecas
 	}
 }
 var(
-	key = []byte("a very very very very secret key") // 32 bytes
+	key = []byte("TW4e87abf80afb7467eb89qwesad1234") // 32 bytes
 )
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
 func (a userUsecase) ValidateUser(c context.Context, email,password string) (*models.UserDto, error) {
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
 	defer cancel()
-	plaintext := []byte(password)
-	ciphertext, err := decrypt(key, plaintext)
-	if err != nil {
-		return nil,err
+
+	//plaintext := []byte(password)
+	//ciphertext, err := encrypt(key, plaintext)
+	//if err != nil {
+	//	return nil,err
+	//}
+	//fmt.Printf("%0x\n", ciphertext)
+	user ,err := a.userRepo.ValidateUser(ctx,email)
+	if err != nil{
+		return nil,models.ErrUnAuthorize
 	}
-	password = fmt.Sprintf("%0x\n", ciphertext)
-	user ,err := a.userRepo.ValidateUser(ctx,email,password)
-
-
-
+	match := CheckPasswordHash(password, user.Password)
+	if match == false{
+		return nil,models.ErrUnAuthorize
+	}
+	password = user.Password
 	if err != nil{
 		return nil,models.ErrUnAuthorize
 	}
 	result := &models.UserDto{
 		Id:        user.Id,
 		UserEmail: user.UserEmail,
-		Password:  user.Password,
+		Password:  password,
 		Phone:     user.Phone,
 	}
 
@@ -76,12 +91,8 @@ func (a userUsecase) Create(c context.Context, user models.NewCommandUser) (*mod
 		Phone:        user.Phone,
 	}
 
-	plaintext := []byte(user.Password)
-	ciphertext, err := encrypt(key, plaintext)
-	if err != nil {
-		return nil,err
-	}
-	userM.Password = fmt.Sprintf("%0x\n", ciphertext)
+	hash, _ := HashPassword(user.Password)
+	userM.Password = hash
 
 	insert ,err := a.userRepo.Create(ctx,userM)
 	if err != nil {

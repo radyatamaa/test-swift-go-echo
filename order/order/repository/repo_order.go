@@ -56,6 +56,7 @@ func (m *orderRepository) fetch(ctx context.Context, query string, args ...inter
 			&t.Status 			,
 			&t.TotalPrice 		,
 			&t.CustomerReceived ,
+			&t.Remarks,
 		)
 
 		if err != nil {
@@ -70,7 +71,7 @@ func (m *orderRepository) fetch(ctx context.Context, query string, args ...inter
 
 func (m *orderRepository) Insert(ctx context.Context, a *models.Order) error {
 	query := `INSERT orders SET id=? , created_by=? , created_date=? , modified_by=?, modified_date=? , deleted_by=? , deleted_date=? , is_deleted=? , is_active=? ,
-	reference_number=?,customer_name=?,source_address=?,dest_address,status=?,total_price=?,customer_received=?,remarks=?`
+	reference_number=?,customer_name=?,source_address=?,dest_address=?,status=?,total_price=?,customer_received=?,remarks=?`
 	stmt, err := m.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return err

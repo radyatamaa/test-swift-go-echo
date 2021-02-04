@@ -238,7 +238,7 @@ func (m *outboundRepository) List(ctx context.Context, limit, offset int) ([]*mo
 				outbounds i
 				JOIN products p ON p.id = i.product_id
 				WHERE i.is_active = 1 AND i.is_deleted = 0 AND p.is_active = 1 AND p.is_deleted = 0`
-
+	query = query + ` order by created_date desc`
 	query = query + ` LIMIT ? OFFSET ?`
 	list, err := m.fetchJoinProduct(ctx, query, limit, offset)
 	if err != nil {

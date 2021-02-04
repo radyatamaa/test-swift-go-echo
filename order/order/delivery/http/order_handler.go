@@ -29,6 +29,7 @@ type orderHandler struct {
 func NeworderHandler(e *echo.Echo, us order.Usecase, authUsecase auth.Usecase) {
 	handler := &orderHandler{
 		orderUsecase: us,
+		authUsecase:authUsecase,
 	}
 	e.POST("/order/order", handler.Create)
 	e.PUT("/order/order-status/:id", handler.UpdateStatus)
@@ -100,6 +101,11 @@ func (a *orderHandler) UpdateStatus(c echo.Context) error {
 func (a *orderHandler) Create(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
 	tokenAuth, err := a.authUsecase.ExtractTokenMetadata(c.Request())
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, "unauthorized")

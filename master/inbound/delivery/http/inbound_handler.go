@@ -29,9 +29,10 @@ type inboundHandler struct {
 func NewinboundHandler(e *echo.Echo, us inbound.Usecase, authUsecase auth.Usecase) {
 	handler := &inboundHandler{
 		inboundUsecase: us,
+		authUsecase:authUsecase,
 	}
 	e.POST("/master/inbound", handler.Create)
-	e.PUT("/master/inbound/:id", handler.UpdateInboundy)
+	//e.PUT("/master/inbound/:id", handler.UpdateInboundy)
 	e.DELETE("/master/inbound/:id", handler.Delete)
 	// e.GET("/countrys/:id/credit", handler.GetCreditByID)
 	e.GET("/master/inbound/:id", handler.GetDetailID)
@@ -49,6 +50,12 @@ func isRequestValid(m *models.NewCommandInbound) (bool, error) {
 func (a *inboundHandler) Delete(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
 	tokenAuth, err := a.authUsecase.ExtractTokenMetadata(c.Request())
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, "unauthorized")
@@ -97,42 +104,53 @@ func (a *inboundHandler) List(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
-func (a *inboundHandler) UpdateInboundy(c echo.Context) error {
-	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	tokenAuth, err := a.authUsecase.ExtractTokenMetadata(c.Request())
-	if err != nil {
-		return c.JSON(http.StatusUnauthorized, "unauthorized")
-
-	}
-	userId, err := a.authUsecase.FetchAuth(tokenAuth)
-	if err != nil {
-		return c.JSON(http.StatusUnauthorized, "unauthorized")
-
-	}
-	id := c.Param("id")
-	var inbound models.NewCommandInbound
-	inbound.Id = id
-	err = c.Bind(&inbound)
-	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
-	}
-
-	ctx := c.Request().Context()
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
-	err = a.inboundUsecase.Update(ctx, &inbound, userId)
-	if err != nil {
-		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
-	}
-	return c.JSON(http.StatusOK, inbound)
-}
+//func (a *inboundHandler) UpdateInboundy(c echo.Context) error {
+//	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+//	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+//	token := c.Request().Header.Get("Authorization")
+//
+//	if token == "" {
+//		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+//	}
+//
+//	tokenAuth, err := a.authUsecase.ExtractTokenMetadata(c.Request())
+//	if err != nil {
+//		return c.JSON(http.StatusUnauthorized, "unauthorized")
+//
+//	}
+//	userId, err := a.authUsecase.FetchAuth(tokenAuth)
+//	if err != nil {
+//		return c.JSON(http.StatusUnauthorized, "unauthorized")
+//
+//	}
+//	id := c.Param("id")
+//	var inbound models.NewCommandInbound
+//	inbound.Id = id
+//	err = c.Bind(&inbound)
+//	if err != nil {
+//		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+//	}
+//
+//	ctx := c.Request().Context()
+//	if ctx == nil {
+//		ctx = context.Background()
+//	}
+//
+//	err = a.inboundUsecase.Update(ctx, &inbound, userId)
+//	if err != nil {
+//		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+//	}
+//	return c.JSON(http.StatusOK, inbound)
+//}
 
 func (a *inboundHandler) Create(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
 	tokenAuth, err := a.authUsecase.ExtractTokenMetadata(c.Request())
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, "unauthorized")
@@ -164,6 +182,11 @@ func (a *inboundHandler) Create(c echo.Context) error {
 func (a *inboundHandler) GetDetailID(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
 	tokenAuth, err := a.authUsecase.ExtractTokenMetadata(c.Request())
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, "unauthorized")

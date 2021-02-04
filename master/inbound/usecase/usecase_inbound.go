@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"github.com/helper"
+	"github.com/master/stock"
 	"math"
 	"time"
 
@@ -15,13 +16,15 @@ import (
 
 type inboundUsecase struct {
 	userUsecase    user.Usecase
+	stocRepo 	stock.Repository
 	inboundRepo    inbound.Repository
 	contextTimeout time.Duration
 }
 
 // NewuserUsecase will create new an userUsecase object representation of user.Usecase interface
-func NewinboundUsecase(userUsecase user.Usecase, inboundRepo inbound.Repository, timeout time.Duration) inbound.Usecase {
+func NewinboundUsecase(	stocRepo 	stock.Repository,userUsecase user.Usecase, inboundRepo inbound.Repository, timeout time.Duration) inbound.Usecase {
 	return &inboundUsecase{
+		stocRepo : stocRepo,
 		userUsecase:    userUsecase,
 		inboundRepo:    inboundRepo,
 		contextTimeout: timeout,
@@ -32,6 +35,10 @@ func (m inboundUsecase) Delete(c context.Context, id string, userId string) (*mo
 	defer cancel()
 
 	err := m.inboundRepo.Delete(ctx, id, userId)
+	if err != nil {
+		return nil, err
+	}
+	err = m.stocRepo.DeleteInOutBound(ctx, id,"", userId)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +73,7 @@ func (m inboundUsecase) Update(c context.Context, ar *models.NewCommandInbound, 
 		DeletedDate:  nil,
 		IsDeleted:    0,
 		IsActive:     1,
-		InboundTime:  ar.InboundTime,
+		InboundTime:  time.Now(),
 		ExpiredDate:  ar.ExpiredDate,
 		ProductId:    ar.ProductId,
 		Jumlah:       ar.Jumlah,
@@ -155,7 +162,8 @@ func (m inboundUsecase) Create(c context.Context, ar *models.NewCommandInbound, 
 		DeletedDate:  nil,
 		IsDeleted:    0,
 		IsActive:     0,
-		InboundTime 	:        ar.InboundTime,
+		InboundTime 	:        time.Now(),
+		ExpiredDate:ar.ExpiredDate,
 		ProductId 		:        ar.ProductId,
 		Jumlah 				:        ar.Jumlah,
 		HargaBeli 		:        ar.HargaBeli,
@@ -168,6 +176,35 @@ func (m inboundUsecase) Create(c context.Context, ar *models.NewCommandInbound, 
 		return nil, err
 	}
 
+	getStock ,err := m.stocRepo.GetFirst(ctx,ar.ProductId)
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	var currentStock int = ar.Jumlah
+	if getStock != nil {
+		currentStock = getStock.CurrentStock + ar.Jumlah
+	}
+	stock := models.Stock{
+		Id:           guuid.New().String(),
+		CreatedBy:    userId,
+		CreatedDate:  time.Now(),
+		ModifiedBy:   nil,
+		ModifiedDate: nil,
+		DeletedBy:    nil,
+		DeletedDate:  nil,
+		IsDeleted:    0,
+		IsActive:     1,
+		ProductId:    ar.ProductId,
+		InboundId:    &insert.Id,
+		OutboundId:  nil,
+		CurrentStock: currentStock,
+	}
+
+	err = m.stocRepo.Insert(ctx,&stock)
+	if err != nil {
+		return nil, err
+	}
 	return ar, nil
 }
 

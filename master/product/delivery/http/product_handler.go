@@ -28,6 +28,8 @@ type productHandler struct {
 func NewproductHandler(e *echo.Echo, us product.Usecase,authUsecase auth.Usecase) {
 	handler := &productHandler{
 		productUsecase: us,
+
+		authUsecase:authUsecase,
 	}
 	e.POST("/master/product", handler.Create)
 	e.PUT("/master/product/:id", handler.UpdateProducty)
@@ -48,6 +50,12 @@ func isRequestValid(m *models.NewCommandProduct) (bool, error) {
 func (a *productHandler) Delete(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
 	tokenAuth, err := a.authUsecase.ExtractTokenMetadata(c.Request())
 	if err != nil {
 		return	c.JSON(http.StatusUnauthorized, "unauthorized")
@@ -99,6 +107,12 @@ func (a *productHandler) List(c echo.Context) error {
 func (a *productHandler) UpdateProducty(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
 	tokenAuth, err := a.authUsecase.ExtractTokenMetadata(c.Request())
 	if err != nil {
 		return	c.JSON(http.StatusUnauthorized, "unauthorized")
@@ -132,6 +146,12 @@ func (a *productHandler) UpdateProducty(c echo.Context) error {
 func (a *productHandler) Create(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
 	tokenAuth, err := a.authUsecase.ExtractTokenMetadata(c.Request())
 	if err != nil {
 		return	c.JSON(http.StatusUnauthorized, "unauthorized")
@@ -163,6 +183,12 @@ func (a *productHandler) Create(c echo.Context) error {
 func (a *productHandler) GetDetailID(c echo.Context) error {
 	c.Request().Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	token := c.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return c.JSON(http.StatusUnauthorized, models.ErrUnAuthorize)
+	}
+
 	tokenAuth, err := a.authUsecase.ExtractTokenMetadata(c.Request())
 	if err != nil {
 		return	c.JSON(http.StatusUnauthorized, "unauthorized")

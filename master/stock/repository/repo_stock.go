@@ -23,6 +23,33 @@ type stockRepository struct {
 func NewStockRepository(Conn *sql.DB) stock.Repository {
 	return &stockRepository{Conn}
 }
+func (m *stockRepository) DeleteInOutBound(ctx context.Context, inboundId string,outboundId string, deleted_by string) error {
+	query := ``
+	if inboundId != ""{
+		query = query + `UPDATE stocks SET deleted_by=? , deleted_date=? , is_deleted=? , is_active=? WHERE inbound_id = '`+inboundId + `' `
+	}else if outboundId != ""{
+		query = query + `UPDATE stocks,outbounds SET stocks.deleted_by=? ,stocks. deleted_date=? , stocks.is_deleted=? , stocks.is_active=? 
+				WHERE (outbounds.id = stocks.outbound_id) AND outbounds.reference_number = '`+outboundId + `' `
+	}
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.ExecContext(ctx, deleted_by, time.Now(), 1, 0)
+	if err != nil {
+		return err
+	}
+
+	//lastID, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	//a.Id = lastID
+	return nil
+}
+
 func (m *stockRepository) fetchJoinProductInOutBound(ctx context.Context, query string, args ...interface{}) ([]*models.StockJoinProductInOutbound, error) {
 	rows, err := m.Conn.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -202,10 +229,11 @@ func (m *stockRepository) List(ctx context.Context, limit, offset int,productId 
 					p.sku as product_sku ,
 					p.name as product_name ,
 					i.created_date as inbound_date,
-					i.jumlah as as inbound_qty,
+					i.jumlah as  inbound_qty,
 					o.created_date as outbound_date,
-					o.outbound_qty as qty
+					o.qty as outbound_qty
 				FROM stocks s
+				JOIN products p ON p.id = s.product_id
 				LEFT JOIN inbounds i ON i.id = s.inbound_id
 				LEFT JOIN outbounds o ON i.id = s.outbound_id
 				WHERE s.is_deleted = 0 and s.is_active = 1 `
@@ -213,7 +241,7 @@ func (m *stockRepository) List(ctx context.Context, limit, offset int,productId 
 	if bound == 1{
 		query = query + ` AND s.inbound_id is not null `
 	}else if bound == 2{
-		query = query + ` AND s.outbound_id is not nul `
+		query = query + ` AND s.outbound_id is not null `
 	}
 	if productId != ""{
 		query = query + ` AND s.product_id = '` + productId + `' `

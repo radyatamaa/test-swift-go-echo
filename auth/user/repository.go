@@ -6,6 +6,6 @@ import (
 )
 
 type Repository interface {
-	ValidateUser(ctx context.Context, email,password string) (*models.User, error)
+	ValidateUser(ctx context.Context, email string) (*models.User, error)
 	Create(ctx context.Context, user models.User) (*string, error)
 }

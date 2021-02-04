@@ -1,8 +1,8 @@
 version: "2.3"
 services:
   web:
-    image: radyatamaa/cgo-indonesia-api:1.0.0
-    container_name: cgo_api
+    image: radyatamaa/test-swift-go-echo:1.0.0
+    container_name: test-swift-go-echo
     ports:
       - 9090:9090
 
